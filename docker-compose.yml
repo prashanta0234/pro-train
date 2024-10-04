@@ -1,0 +1,44 @@
+version: '3'
+
+services:
+  mysql:
+    restart: on-failure
+    image: mysql:8.1.0
+    container_name: pro-train-db
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DATABASE_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DATABASE_NAME}
+      MYSQL_USER: ${DATABASE_USER}
+      MYSQL_PASSWORD: ${DATABASE_PASSWORD}
+    ports:
+      - '3306:3306'
+    volumes:
+      - ./data:/var/lib/mysql
+    networks:
+      - pro-train
+
+  protrain-adminer:
+    restart: on-failure
+    image: adminer:latest
+    container_name: pro-train-adminer
+    ports:
+      - 3039:8080
+    networks:
+      - pro-train
+
+  protrain-backend:
+    restart: on-failure
+    build: ./backend
+    container_name: pro-train-backend
+    ports:
+      - '5000:5000'
+    environment:
+      DATABASE_URL: mysql://DATABASE_USER:DATABASE_PASSWORD@mysql:3306/DATABASE_NAME
+    volumes:
+      - ./backend:/app
+    networks:
+      - pro-train
+
+networks:
+  pro-train:
+    name: pro-train
